@@ -84,7 +84,8 @@ sub _parse
 	      $classname =~ s/[\{\}]//g;
 	      last if ($self->skip($classname));
 	      $Class = Autodia::Diagram::Class->new($classname);
-	      $Diagram->add_class($Class);
+	      my $exists = $Diagram->add_class($Class);
+	      $Class = $exists if ($exists);
 
 	      # handle superclass(es)
 	      if ($line =~ m/^\s*class\s+\w+\s*\:\s*([^{]+)\s*/)
@@ -218,7 +219,7 @@ sub _parse
                             (~?\w+)                  # name of the method: $3
                             \s*                      # whitespace
                             \(\s*                    # start of parameter list
-                            ([:\w\,\s\*=&\"<>\\]*)   # all parameters: $4
+                            ([:\w\,\s\*=&\"<>\\\d\-]*)  # all parameters: $4
                             (\)?)                    # may be an ending bracket: $5
                             [\w\s=]*(;?)             # possibly end of signature $6
                             .*$/x

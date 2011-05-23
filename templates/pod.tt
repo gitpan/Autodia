@@ -1,7 +1,7 @@
 [% classes = diagram.Classes %]
 [% FOREACH class = classes %]
 
-[% SET filename = class.Name _ ".pod" %]
+[% SET filename = class.Name.split('::').join('_') _ ".pod" %]
 [% USE String %]
 [% SET filename = String.new(class.Name).replace('::', '_') _ '.pod' %]
 creating pod for [% class.Name %] : [% filename %]
@@ -63,9 +63,9 @@ my $xxx = [% class.Name %]->[% op.name %]( .. );
 =head2 [% op.name %]
 
 
-my $xxx = [% class.Name %]->[% op.name %]( .. );
+my $xxx = [% class.Name %]->[% op.name %] ( [% FOREACH par = op.Param %] [% par.Name %] => xxx [% IF loop.last %] [% ELSE %], [% END %] [% END %] );
 
-takes arguments :
+takes arguments :  [% FOREACH par = op.Param %] [% par.Name %] [% IF loop.last %] [% ELSE %], [% END %] [% END %]
 
 returns : 
 
@@ -76,6 +76,10 @@ returns :
 =cut
 
 ### CODE GOES HERE ###
+
+=head1 NOTES
+
+Created using Autodia (http://www.aarontrevena.co.uk/opensource/autodia/index.html) : autodia.pl -l perl -r -d path/to/files -t /path/to/pod.tt -F -O
 
 =head1 SEE ALSO
 

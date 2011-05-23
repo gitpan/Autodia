@@ -7,7 +7,7 @@ Autodia.pm - The configuration and Utility perl module for AutoDia.
 
 =head1 VERSION
 
-2.10
+2.11
 
 =head1 DESCRIPTION
 
@@ -75,7 +75,7 @@ my %perl = (
 BEGIN {
         use Exporter ();
         use vars qw($VERSION @ISA @EXPORT);
-        $VERSION = "2.10";
+        $VERSION = "2.11";
         @ISA = qw(Exporter);
         @EXPORT = qw(
 		     &getHandlers
@@ -101,11 +101,14 @@ sub getHandlers
 		    "cpp"	=> 'Autodia::Handler::Cpp',
 		    "php"	=> 'Autodia::Handler::PHP',
 		    "dbi"       => 'Autodia::Handler::DBI',
+		    "dbi_sqlt"  => 'Autodia::Handler::DBI_SQLT',
 		    "dia"       => 'Autodia::Handler::dia',
 		    "sql"       => 'Autodia::Handler::SQL',
 		    "torque"    => 'Autodia::Handler::Torque',
 		    "python"    => 'Autodia::Handler::python',
 		    "umbrello"  => 'Autodia::Handler::umbrello',
+		    "asp"       => 'Autodia::Handler::ASP',
+		    "mason"  => 'Autodia::Handler::Mason',
 		   );
     print "getting handlers..\n" unless ( $config{silent} );
     return \%handlers;
@@ -162,6 +165,16 @@ sub getPattern
 		   wildcards =>  ['xmi'],
 		);
 
+  my %asp   = ( regex => '\w+.asp',
+                   wildcards =>  ['asp'],
+                );
+
+  my %mason = ( regex => '\w+(.(mas|m?html)|handler)$',
+                  wildcards =>  ['mas', 'html', 'mhtml'],
+               );
+
+
+
   my %patterns = (
 		  "perl" => \%perl,
 		  'c++'  => \%cpp,
@@ -174,6 +187,8 @@ sub getPattern
 		  "torque" => {},
 		  "python" => \%python,
 		  "umbrello" => \%umbrello,
+                  "asp" => \%asp,
+	          "mason" => \%mason,
 		 );
 
   return \%{$patterns{$language}};

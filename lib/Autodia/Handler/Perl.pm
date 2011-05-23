@@ -96,7 +96,7 @@ sub _parse {
     my $fh       = shift;
     my $filename = shift;
     my $Diagram  = $self->{Diagram};
-    my $pkg_regexp = '[A-Z][\w:]+';
+    my $pkg_regexp = '[A-Za-z][\w:]+';
     my $Class;
 
     # Class::Tangram bits
@@ -139,7 +139,8 @@ sub _parse {
 	  # create new class with name
 	  $Class = Autodia::Diagram::Class->new($className);
 	  # add class to diagram
-	  $Class = $Diagram->add_class($Class);
+	  my $exists = $Diagram->add_class($Class);
+	  $Class = $exists if ($exists);
 	}
 
         my $continue_base = $continue->{base};
@@ -184,7 +185,7 @@ sub _parse {
 		    my $Superclass = Autodia::Diagram::Superclass->new($super);
 		    # add superclass to diagram
 		    $self->{_superclasses}{$Class->Name}{$super} = 1;
-		    if ($super =~ m/Class..Accessor\:\:/) {
+		    if ($super =~ m/Class..Accessor\:*/) {
 			$self->{_superclasses}{$Class->Name}{'Class::Accessor'} = 1;
 		    }
 
@@ -214,16 +215,21 @@ sub _parse {
 
 	# if line contains dependancy name then parse for module name
 	if ($line =~ /^\s*(use|require)\s+($pkg_regexp)/) {
-#	    warn "found a module being used/requireed : $2\n";
+#	    warn "found a module being used/required : $2\n";
 	    unless (ref $Class) {
 		# create new class with name
 		$Class = Autodia::Diagram::Class->new($filename);
 		# add class to diagram
-		$Class = $Diagram->add_class($Class);
+		my $exists = $Diagram->add_class($Class);
+		$Class = $exists if ($exists);
 	    }
 	    my $componentName = $2;
 	    # discard if stopword
 	    next if ($componentName =~ /^(strict|vars|exporter|autoloader|warnings.*|constant.*|data::dumper|carp.*|overload|switch|\d|lib)$/i);
+
+	    if ($componentName eq 'Class::XSAccessor') {
+	      $self->{_class_xsaccessor} = 1;
+	    }
 
 	    if ($componentName eq 'Object::InsideOut') {
 	      $self->{_insideout_class} = 1;
@@ -720,6 +726,10 @@ sub _parse {
 				});
       }
 
+
+      if ( $self->{_class_xsaccessor} ) {
+
+      }
 
       # if line is Object::InsideOut metadata then parse out
       if ($self->{_insideout_class} && $line =~ /^\s*my\s+\@\w+\s+\:FIELD\s*\((.*)\)/) {
